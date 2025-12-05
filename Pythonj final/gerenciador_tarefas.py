@@ -9,7 +9,8 @@ st.set_page_config(
     page_title="Gerenciador de Tarefas",
     page_icon="✅",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items=None
 )
 
 
@@ -19,6 +20,21 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     .stDeployButton {display:none;}
+    
+    /* Garantir que o botão de toggle do sidebar SEMPRE fique visível e acessível */
+    button[kind="header"],
+    button[title="View sidebar"],
+    button[title="Close sidebar"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 999 !important;
+    }
+    
+    /* Garantir que o sidebar possa ser visto */
+    [data-testid="stSidebar"] {
+        visibility: visible !important;
+    }
     
     /* Garantir que cores se adaptem ao tema */
     .stMarkdown p {
@@ -104,8 +120,25 @@ def obter_cor_prioridade(prioridade: str) -> str:
 
 inicializar_tarefas()
 
-
+# Título principal
 st.title("✅ Gerenciador de Tarefas")
+
+# Formulário para criar tarefas diretamente na página principal
+with st.expander("➕ Criar Nova Tarefa", expanded=True):
+    col1, col2 = st.columns(2)
+    with col1:
+        nova_descricao = st.text_area("Descrição da tarefa", height=100, placeholder="Digite a descrição da tarefa...", key="nova_descricao")
+    with col2:
+        nova_prioridade = st.selectbox("Prioridade", ["Alta", "Média", "Baixa"], index=1, key="nova_prioridade")
+        nova_categoria = st.text_input("Categoria", placeholder="Ex: Trabalho", key="nova_categoria")
+    
+    if st.button("➕ Adicionar Tarefa", type="primary", use_container_width=True):
+        if adicionar_tarefa(nova_descricao, nova_prioridade, nova_categoria):
+            st.success("Tarefa adicionada com sucesso! ✅")
+            st.rerun()
+        else:
+            st.warning("Por favor, digite uma descrição para a tarefa.")
+
 st.markdown("---")
 
 
